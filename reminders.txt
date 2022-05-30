@@ -1,0 +1,13 @@
+Push the database schema using the local environement variable file
+dotenv -e .env.local npx prisma db push
+
+Open the Prisma Studio
+dotenv -e .env.local npx prisma studio
+
+Generate Prisma client (comment: this won't update it on the server)
+dotenv -e .env.local npx prisma generate
+
+Ultimate docker reset everything command
+docker-compose build --force-rm --no-cache && docker-compose up --detach && docker-compose logs -f
+
+When changing the schema, the Prisma Client must be updated

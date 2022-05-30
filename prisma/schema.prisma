@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model Game {
+  id Int @default(autoincrement()) @id
+  companies Company[]
+  users User[]
+  logs Log[]
+  gameCode String
+  currentStepId Int?
+  currentStep Step? @relation(fields: [currentStepId], references: [id])
+}
+
+model Log {
+  id Int @default(autoincrement()) @id
+  value String
+  createdTime DateTime @default(now())
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
+}
+
+model Company {
+  id Int @default(autoincrement()) @id
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
+  companyPayingShares Int @default(0)
+  companyCode String
+  lastPayout Int @default(0)
+  lastReceived Int @default(0)
+  cumulativeReceived Int @default(0)
+  companyShares CompanyShare[]
+  shareValue Int?
+}
+
+model CompanyShare {
+  id Int @default(autoincrement()) @id
+  company Company @relation(fields: [companyId], references: [id])
+  companyId Int
+  user User  @relation(fields: [userId], references: [id])
+  userId Int
+  quantity Int @default(0)
+}
+
+model User {
+  id Int @default(autoincrement()) @id
+  companyShares CompanyShare[]
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
+  name String
+  lastPayout Int @default(0)
+  cumulativePayout Int @default(0)
+  @@map(name: "users")
+  cash Int?
+}
+
+model Step {
+  id Int @default(autoincrement()) @id
+  previousStepId Int?
+  previousStep Step? @relation("StepsTimeline", fields: [previousStepId], references: [id])
+  nextStep Step? @relation("StepsTimeline")
+  actions Action[]
+  game Game?
+}
+
+model Action {
+  id Int @default(autoincrement()) @id
+  stepId Int
+  step Step @relation(fields: [stepId], references: [id])
+  actionType String
+  entityType String
+  entityId Int
+  payload String?
+}
